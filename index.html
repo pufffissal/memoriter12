@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memoriter gyakorló</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.8;
+            margin: 0;
+            padding: 0;
+            background: #f4f4f9;
+            color: #333;
+        }
+
+        header {
+            background: #007bff;
+            color: #fff;
+            padding: 20px 10px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        main {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        #text-container {
+            padding: 15px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            font-size: 18px;
+            line-height: 1.6;
+            text-align: justify;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 15px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: background-color 0.2s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        #hidden-text-container {
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        #hidden-text {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background: #e9f7ff;
+            border: 1px solid #b3e5fc;
+            border-radius: 10px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+            font-size: 16px;
+            line-height: 1.5;
+            text-align: justify;
+        }
+
+        footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 1px 0;
+            background: #007bff;
+            color: white;
+            text-align: center;
+            font-size: 14px;
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Memoriter 12</h1>
+    </header>
+
+    <main>
+        <div id="text-container">
+            Josie is taking part in a protest march. She is against testing on animals. Protesters think people need to know that animals have right. There are other ways to help science and save lives. Josie is against cruelty to farm animals, too. She is probably a vegetarian. Josie wants Clive to take a leaflet and join the protest march. Both Josie and Clive believe that some farm animals live in terrible conditions. Clive doesn’t want to join because he doesn’t exactly agree to stop animal testing as it helps science. He is not a vegetarian and he likes fried chicken. As a result, he is a meat-eater. At the moment he is wearing a leather jacket made from an animal.
+        </div>
+
+        <div class="controls">
+            <button onclick="removeWords()">-3 szó elvétele</button>
+            <button onclick="undo()" id="undo-btn" disabled>Visszavonás</button>
+            <button onclick="redo()" id="redo-btn" disabled>Újra</button>
+        </div>
+
+        <div id="hidden-text-container">
+            <button onclick="toggleFullText()">Felfedés/Rejtés</button>
+            <div id="hidden-text">
+                Josie is taking part in a protest march. She is against testing on animals. Protesters think people need to know that animals have right. There are other ways to help science and save lives. Josie is against cruelty to farm animals, too. She is probably a vegetarian. Josie wants Clive to take a leaflet and join the protest march. Both Josie and Clive believe that some farm animals live in terrible conditions. Clive doesn’t want to join because he doesn’t exactly agree to stop animal testing as it helps science. He is not a vegetarian and he likes fried chicken. As a result, he is a meat-eater. At the moment he is wearing a leather jacket made from an animal.
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        &copy; 2025 Memoriter gyakorló. Minden jog fenntartva.
+    </footer>
+
+    <script>
+        let originalText = document.getElementById('text-container').innerHTML;
+        let history = [];
+        let redoStack = [];
+
+        function removeWords() {
+            let words = document.getElementById('text-container').textContent.split(' ');
+            if (words.length <= 3) return;
+
+            history.push(words.join(' '));
+            document.getElementById('undo-btn').disabled = false;
+
+            for (let i = 0; i < 3; i++) {
+                let randomIndex = Math.floor(Math.random() * words.length);
+                words[randomIndex] = '_____';
+            }
+
+            document.getElementById('text-container').innerHTML = words.join(' ');
+            redoStack = [];
+            document.getElementById('redo-btn').disabled = true;
+        }
+
+        function undo() {
+            if (history.length === 0) return;
+            let lastState = history.pop();
+            redoStack.push(document.getElementById('text-container').innerHTML);
+            document.getElementById('text-container').innerHTML = lastState;
+
+            document.getElementById('redo-btn').disabled = false;
+            if (history.length === 0) {
+                document.getElementById('undo-btn').disabled = true;
+            }
+        }
+
+        function redo() {
+            if (redoStack.length === 0) return;
+            let nextState = redoStack.pop();
+            history.push(document.getElementById('text-container').innerHTML);
+            document.getElementById('text-container').innerHTML = nextState;
+
+            document.getElementById('undo-btn').disabled = false;
+            if (redoStack.length === 0) {
+                document.getElementById('redo-btn').disabled = true;
+            }
+        }
+
+        function toggleFullText() {
+            const hiddenText = document.getElementById('hidden-text');
+            if (hiddenText.style.display === 'none') {
+                hiddenText.style.display = 'block';
+            } else {
+                hiddenText.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
